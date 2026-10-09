@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const Database = require('better-sqlite3');
 const db = new Database('tarefas.db');
 db.exec (`CREATE TABLE IF NOT EXISTS tarefas (
@@ -10,7 +11,9 @@ const app = express();
 const porta = 3000;
 app.use(express.json());
 
-let tarefas = [];
+app.use(cors());
+
+
 
 app.get('/', function (req, res){
     res.send('Servidor funcionando!');
@@ -23,7 +26,7 @@ app.get('/tarefas', function (req, res){
         return {
             id: linha.id,
             texto: linha.texto,
-            concluida: !!linha.concluida === 1
+            concluida: linha.concluida === 1
         };
     });
 
@@ -52,8 +55,8 @@ app.put('/tarefas/:id', function (req, res){
 
     const tarefa = db.prepare('SELECT * FROM tarefas WHERE id = ?').get(id);
 
-    if(!tarefas) {
-        res.status(404);res.json({ error: 'Tarefa não encontrada.'});
+    if(!tarefa) {
+        res.status(404).json({ error: 'Tarefa não encontrada.' });
         return;
     }
 
@@ -66,18 +69,15 @@ app.put('/tarefas/:id', function (req, res){
         texto: tarefa.texto,
         concluida: novoValor === 1
     });
-
-    tarefas[id].concluida = !tarefas[id].concluida;
-
-    res.json(tarefas[id]);
 });
+    
 
 app.delete('/tarefas/:id', function (req, res){
     const id = req.params.id;
 
     const tarefa = db.prepare('SELECT * FROM tarefas WHERE id = ?').get(id);
 
-    if(!tarefas){
+    if(!tarefa){
         res.status(404).json({ error: 'Tarefa não encontrada.'});
         return;
     }
