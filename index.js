@@ -8,7 +8,7 @@ db.exec (`CREATE TABLE IF NOT EXISTS tarefas (
     concluida INTEGER NOT NULL DEFAULT 0
 )`);
 const app = express();
-const porta = 3000;
+const porta = process.env.PORT || 3000;
 app.use(express.json());
 
 app.use(cors());
